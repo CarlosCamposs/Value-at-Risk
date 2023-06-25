@@ -372,10 +372,15 @@ for (j in 1:length(cartera)){
 colnames(VaR_SM)<-c("WALMEX","FEMSA")
 View(VaR_SM)
 
+######
+# VaR - Diversificado (Simulacion Monte Carlo - 1 día)
+
 
 
 # -------------------------------------------------------------------------------------------
 # Metodo de Simulacion Bootstrap
+
+
 
 
 VaRBoots95<-data.frame()  
