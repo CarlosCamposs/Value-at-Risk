@@ -431,3 +431,4 @@ View(table)
 resultados<-rbind(VaR_SH,VaR_SM,VaR_Boots)
 rownames(resultados)<-c("Sim. Historica", "Sim. Montecarlo", "Bootstrap")
 View(resultados)
+# -------------------------------------------------------------------------------------------
