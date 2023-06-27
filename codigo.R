@@ -87,7 +87,7 @@ colnames(tabla_revaluacion)<-c("WALMEX","FEMSA")
 
 #####
 # P&L individual
-# Creamos la funcion P&L de cada emisora y las juntamos en un dataframe llamado PL_Portafolio
+# Creamos la funcion P&L de cada emisora y cada una aparece en un dataframe llamado PL_Portafolio
 
 PL_Portafolio<-data.frame()  
 
