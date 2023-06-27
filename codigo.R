@@ -17,7 +17,10 @@ library(lcopula)
 library(VineCopula)
 library(VC2copula)
 library(scatterplot3d)
-library(cvar)  
+library(cvar)
+library(knitr)
+library(DescTools) #Closest
+
 
 
 
@@ -97,8 +100,25 @@ PL_Portafolio<-data.frame()
       }
   }  
 
+#####
+# P&L portafolio diversificado
+# Creamos la tabla que representa la suma de cada una de las P&L de las emisoras, a esto se le
+# conoce como un "neteo"
 
-hist(PL_Portafolio$WALMEX) # Revisamos la distribucion de la P&L
+  PL_Portafolio2 <-data.frame()
+      for(i in 1:nrow(PL_Portafolio)){
+        PL_Portafolio2[i,1]<-rowSums(PL_Portafolio)[i]
+      }
+
+View(PL_Portafolio2)
+
+#####
+# Pegamos esta tabla con la tabla PL_Portafolio, esta ultima tiene las P&L de cada emisora de forma individual
+  PL_Portafolio<-cbind(PL_Portafolio,PL_Portafolio2)
+
+  colnames(PL_Portafolio)<-c("WALMEX","FEMSA","Diversificado")
+  View(PL_Portafolio)
+
 
 
 # -------------------------------------------------------------------------------------------
@@ -192,7 +212,7 @@ hist(PL_Portafolio$WALMEX) # Revisamos la distribucion de la P&L
 
   
 #  valores<-cbind(tabla_rendimientos$WALMEX,tabla_rendimientos$FEMSA)
-  gofCopula(copula,valores)    
+    # gofCopula(copula,valores)    
     # "valores" seran transformados a pseudo-obs
   
 # Prueba con ua copula random
@@ -267,11 +287,9 @@ colnames(tVaR95)<-c("WALMEX","FEMSA")
   
 
 # VaR y tVaR
-colMeans(VaR95)
-colMeans(tVaR95)
-  
-colnames(table)<-c("VaR al 95%", "tVaR al 95%")  
+
 table<-cbind(colMeans(VaR95),colMeans(tVaR95))  
+colnames(table)<-c("VaR95", "tVaR95")  
 View(table)
 
 # -------------------------------------------------------------------------------------------
@@ -282,16 +300,36 @@ View(PL_Portafolio)
 ######
 # VaR - No diversificado (Simulacion Historica - 1 día)
 VaR_SH<-data.frame()
-
+tVaR_SH<-data.frame()
   
   for(i in 1:length(cartera)){
       VaR_SH[1,i]<-quantile(PL_Portafolio[,i],0.95)
+      tVaR_SH[1,i]<-ES(dist=PL_Portafolio[,i],p_loss = 0.05)
   }
-View(VaR_SH)
+
 colnames(VaR_SH)<-c("WALMEX","FEMSA")
+colnames(tVaR_SH)<-c("WALMEX","FEMSA")
+
+View(VaR_SH)
+View(tVaR_SH)
+
+table1_SH<-rbind(VaR_SH,tVaR_SH)
+rownames(table1_SH)<-c("VaR_SH","tVaR_SH")
+View(table1_SH)
 
 ######
 # VaR - Diversificado (Simulacion Historica - 1 día)
+View(PL_Portafolio)
+
+table2_SH<-data.frame()
+    for(i in 1:length(cartera)){
+      table2_SH[1,1]<-quantile(PL_Portafolio[,3],0.95)
+      table2_SH[2,1]<-ES(dist=PL_Portafolio[,3],p_loss = 0.05)
+    }
+
+  colnames(table2_SH)<-c("Diversificado")
+  rownames(table2_SH)<-c("VaR_SH","tVaR_SH")
+  View(table2_SH)
 
 
 # -------------------------------------------------------------------------------------------
@@ -307,15 +345,17 @@ sd<-c(sd(tabla_rendimientos$WALMEX),sd(tabla_rendimientos$FEMSA))
 #####
 # Simulaciones
 
-VaRSM95<-data.frame()  
+VaRSM<-data.frame()  
+tVaRSM<-data.frame()  
+Diversificado_SM<-data.frame() #Servira para almacenar el VaR y tVaR del portafolio diversificado
 
 for(i in 1:5){ # Este "for" corresponde al numero de simulaciones, tarda mucho tiempo, se puede correr una sola simulacion para ver los resultados rapidos
-  
+ 
   rendimientos_simMC<-data.frame()
   
   for(k in 1:length(cartera)){
-    for(j in 1:length(tabla_rendimientos$WALMEX)){
-      rendimientos_simMC[j,k]<-rnorm(length(tabla_rendimientos$WALMEX),mean = means[k],sd = sd[k])[j]
+    for(j in 1:nrow(tabla_rendimientos)){
+      rendimientos_simMC[j,k]<-rnorm(nrow(tabla_rendimientos),mean = means[k],sd = sd[k])[j]
     }
     
   } 
@@ -329,7 +369,7 @@ for(i in 1:5){ # Este "for" corresponde al numero de simulaciones, tarda mucho t
   tabla_revaluacionSM<-data.frame()
   for(k in 1:length(cartera)){
     
-    for( j in 1:length(rendimientos_simMC$V1)){
+    for( j in 1:nrow(rendimientos_simMC)){
       tabla_revaluacionSM[j,k]<-ultimo_precio[,k]*(1+rendimientos_simMC[j,k])
     }
     
@@ -340,95 +380,197 @@ for(i in 1:5){ # Este "for" corresponde al numero de simulaciones, tarda mucho t
   # Construimos la P&L de cada emisora
   PL_EmisorasSM<-data.frame()
   
-  for (k in 1:length(tabla_revaluacionSM)){
+  for (k in 1:ncol(tabla_revaluacionSM)){
     
-    for(j in 1:length(tabla_revaluacionSM$V1)){
+    for(j in 1:nrow(tabla_revaluacionSM)){
       
       PL_EmisorasSM[j,k]<-ultimo_precio[k]-tabla_revaluacionSM[j,k]
     }
   }
   
-  
   #######################
-  # VaR - Portafolio (Simulacion Montecarlo - 1 día)
-
-  for(j in 1:length(cartera)){
-    VaRSM95[i,j]<-quantile(PL_EmisorasSM[,j],probs=0.95) 
+  # P&L Portafolio diversificado
+  # Construimos la P&L del portafolio diversificado, la cual resulta de realizar un neteo
+  
+  PL_SM<-data.frame()
+  
+  for(k in 1:nrow(PL_EmisorasSM)){
+    PL_SM[k,1]<-rowSums(PL_EmisorasSM)[k]
   }
   
+  
+  #######################
+  # VaR y tVaR de cada emisora (Simulacion Montecarlo - 1 día)
+
+  for(j in 1:length(cartera)){
+    VaRSM[i,j]<-quantile(PL_EmisorasSM[,j],probs=0.95)
+    tVaRSM[i,j]<-ES(dist=PL_EmisorasSM[,j],p_loss = 0.05)
+  }
+  
+  #######################
+  # VaR y tVaR del portafolio diversificado (Simulacion Montecarlo - 1 día)
+  
+    Diversificado_SM[i,1]<-quantile(PL_SM$V1,probs=0.95) # VaR
+    Diversificado_SM[i,2]<-ES(dist=PL_SM$V1,p_loss = 0.05) #tVaR
+    
 }
-View(VaRSM95)
+View(VaRSM)
+View(tVaRSM)
+View(Diversificado_SM)
+
+# El VaR por metodo de simulacion de Monte Carlo de cada emisora es el promedio de cada columna
+
+######
+# VaR - No Diversificado (Simulacion Monte Carlo - 1 día)
 
 
-# El VaR de MonteCarlo de cada emisora es el promedio de cada columna
+table1_SM<-data.frame()
 
+  for (j in 1:length(cartera)){
+    table1_SM[1,j]<- colMeans(VaRSM)[j]
+    table1_SM[2,j]<- colMeans(tVaRSM)[j]
+  }
 
-VaR_SM<-data.frame()
-
-for (j in 1:length(cartera)){
-  VaR_SM[1,j]<- colMeans(VaRSM95)[j]
-}
-
-colnames(VaR_SM)<-c("WALMEX","FEMSA")
-View(VaR_SM)
+  colnames(table1_SM)<-c("WALMEX","FEMSA")
+  rownames(table1_SM)<-c("VaR_SM", "tVaR_SM")
+  View(table1_SM)
 
 ######
 # VaR - Diversificado (Simulacion Monte Carlo - 1 día)
 
+table2_SM<-data.frame()
+    for (j in 1:length(cartera)){
+      table2_SM[j,1]<- colMeans(Diversificado_SM)[j]
+    }
+
+  colnames(table2_SM)<-c("Diversificado")
+  rownames(table2_SM)<-c("VaR_SM", "tVaR_SM")
+  View(table2_SM)
 
 
+  
+  
 # -------------------------------------------------------------------------------------------
 # Metodo de Simulacion Bootstrap
 
-
-
-
-VaRBoots95<-data.frame()  
-PL_EmisorasBoots<-data.frame()
+VaRBoots<-data.frame()  
+tVaRBoots<-data.frame()  
+Diversificado_Boots <- data.frame()  
 
 
 for (i in 1:5){ # Este "for" es para las simulaciones, se tarda mucho tiempo. Se puede establecer que haga una simulacion para ver los resultados rapidos
   
   # Hacemos un remuestreo del P&L de cada emisora y lo metemos en un dataframe llamado PL_EmisorasBoots  
   # el remuestro de cada emisora se mete en una columna del de dataframe "PL_EmisorasBoots"
-  for(k in 1:length(cartera)){
-    for (j in 1:length(PL_Portafolio$WALMEX)){
+
+  PL_EmisorasBoots<-data.frame()
+  PL_DiversificadoBoots <- data.frame()
+  
+  #####
+  # Realizamos el remuestro para cada una de las emisoras
+      for(k in 1:length(cartera)){
+        for (j in 1:nrow(PL_Portafolio)){
       
-      PL_EmisorasBoots[j,k]<-sample(PL_Portafolio[,k], size=length(PL_Portafolio$WALMEX), replace = TRUE)[j]
-      
+          PL_EmisorasBoots[j,k]<-sample(PL_Portafolio[,k], size=nrow(PL_Portafolio), replace = TRUE)[j]
+          
+        }
+      }
+  
+  #####
+  # Realizamos el remuestro del portafolio diversificado 
+        for(j in 1:nrow(PL_Portafolio)){
+        PL_DiversificadoBoots[j,1] <- sample(PL_Portafolio[,3], size=nrow(PL_Portafolio), replace = TRUE)[j]
+      } 
+  
+  #####
+  # Calculamos el VaR y tVaR para cada emisora  
+  
+    for (j in 1:length(cartera)){
+      VaRBoots[i,j]<-quantile(PL_EmisorasBoots[,j],0.95) # VaR
+      tVaRBoots[i,j] <- ES(dist=PL_EmisorasBoots[,j],p_loss = 0.05) #tVaR 
     }
-  }
   
-  # Calculamos el VaR para cada emisora  
+  #####
+  # Calculamos el VaR y tVaR del portafolio diversificado  
   
-  for (j in 1:length(cartera)){
-    VaRBoots95[i,j]<-quantile(PL_EmisorasBoots[,j],0.95)
-  }
+    Diversificado_Boots[i,1] <- quantile(PL_DiversificadoBoots$V1,0.95) # VaR del portafolio diversificado
+    Diversificado_Boots[i,2] <- ES(dist=PL_DiversificadoBoots$V1,p_loss = 0.05) # tVaR del portafolio diversificado
   
   
 }
-View(VaRBoots95)
+View(VaRBoots)
+View(tVaRBoots)
+View(Diversificado_Boots)
+
 
 # El VaR por simulacion Bootstrap de cada emisora es el promedio de cada columna
 
-VaR_Boots<-data.frame()
 
-for (j in 1:length(cartera)){
-  VaR_Boots[1,j]<- colMeans(VaRBoots95)[j]
-}
+######
+# VaR - No Diversificado (Simulacion Bootstrapping - 1 día)
 
-colnames(VaR_Boots)<-c("WALMEX","FEMSA")
-View(VaR_Boots)
+table1_Boots<-data.frame()
 
+    for (j in 1:length(cartera)){
+      table1_Boots[1,j]<- colMeans(VaRBoots)[j]
+      table1_Boots[2,j]<- colMeans(tVaRBoots)[j]
+    }
+
+  colnames(table1_Boots)<-c("WALMEX","FEMSA")
+  rownames(table1_Boots)<-c("VaR_Boots","tVaR_Boots")
+  View(table1_Boots)
+
+######
+# VaR - Diversificado (Simulacion Bootstrapping - 1 día)
+  
+table2_Boots<-data.frame()  
+  
+  for (j in 1:length(cartera)){
+    table2_Boots[j,1]<- colMeans(Diversificado_Boots)[j]
+  }
+  
+  colnames(table2_Boots)<-c("Diversificado")
+  rownames(table2_Boots)<-c("VaR_SM", "tVaR_SM")
+  View(table2_Boots)
+  
+  
+  
 # -------------------------------------------------------------------------------------------
 # Recapitulacion de resultados
-View(VaR_SH)
-View(VaR_SM)
-View(VaR_Boots)
-View(table)
+View(table1_SH)
+View(table2_SH)
+  
+View(table1_SM)
+View(table2_SM)
+
+View(table1_Boots)
+View(table2_Boots)
+
+View(table) # VaR y tVaR no diversificado
+
+# table1_X[1,] Contiene los valores del VaR de cada emisora
+# table1_X[2,] Contiene los valores del tVaR de cada emisora
 
 
-resultados<-rbind(VaR_SH,VaR_SM,VaR_Boots)
-rownames(resultados)<-c("Sim. Historica", "Sim. Montecarlo", "Bootstrap")
-View(resultados)
+#####
+# VaR 95%
+
+VaR_vector<-as.data.frame(
+  rbind(table[1,],table1_SH[1,],table1_SM[1,],table1_Boots[1,]))
+rownames(VaR_vector)<-c("Copula","Simulacion Historica","Simulacion Monte-Carlo","Bootstrap")
+
+kable(VaR_vector,digits = 4,caption = "VaR al 95%")
+
+#kable(VaR_vector, digits = 4, col.names = c("KOFUBL","WALMEX","Portafolio") , caption = "VaR al 95%")
+
+#####
+# ES 95%
+
+ES_vector<-as.data.frame(
+  rbind(table[2,],table1_SH[2,],table1_SM[2,],table1_Boots[2,]))
+rownames(ES_vector)<-c("Copula","Simulacion Historica","Simulacion Monte-Carlo","Bootstrap")
+
+kable(ES_vector,digits = 4,caption = "tVaR al 95%")
+
+
 # -------------------------------------------------------------------------------------------
