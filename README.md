@@ -1,7 +1,4 @@
 # Value at Risk
- Cálculo del VaR y tVaR para dos activos de la Bolsa Mexicana de Valores usando cópulas
-
- # <Your-Project-Title>
 
 ## Descripción
 
@@ -35,36 +32,8 @@ Para agregar una captura de pantalla, cree una carpeta `assets/images` en su rep
     ![alt text](assets/images/screenshot.png)
     ```
 
-## Crédito
-
-Enumere sus colaboradores, si los hubiera, con enlaces a sus perfiles de GitHub.
-
-Si utilizó activos de terceros que requieren autoría, enumere los creadores con enlaces a su presencia web principal en esta sección.
-
-Si siguió tutoriales, también incluya enlaces a ellos aquí.
-
-## Licencia
-
-La última sección de un archivo README de alta calidad es la licencia. Esto permite que otros desarrolladores sepan lo que pueden y no pueden hacer con su proyecto. Si necesita ayuda para elegir una licencia, consulte [https://choosealicense.com/](https://choosealicense.com/).
-
----
-
-🏆 Las secciones anteriores son lo mínimo indispensable y su proyecto determinará finalmente el contenido de este documento. También puede considerar agregar las siguientes secciones.
+[Archivo PDF](https://github.com/CarlosCamposs/Value-at-Risk/blob/main/(PDF)%20Calculo%20del%20VaR%20y%20tVaR%20usando%20copulas.pdf).
+[Script de R](https://github.com/CarlosCamposs/Value-at-Risk/blob/main/(R)%20Codigo.R).
 
 ## Insignias
 
-![badmath](https://img.shields.io/github/languages/top/nielsenjared/badmath)
-
-Las insignias en sí mismas no son necesarias, pero demuestran un crédito callejero. Las insignias permiten a otros desarrolladores saber que usted sabe lo que está haciendo. Eche un vistazo a las insignias presentadas por [shields.io](https://shields.io/). Es posible que no comprenda lo que todas ellas representan ahora, pero lo comprenderá con el tiempo.
-
-## Funciones
-
-Si su proyecto tiene muchas funciones, enumérelas aquí.
-
-## Cómo contribuir
-
-Si creó una aplicación o paquete, y desea que otros desarrolladores contribuyan con ella, puede incluir directrices sobre cómo hacerlo. El [Pacto de colaboradores](https://www.contributor-covenant.org/) es un estándar de la industria, pero siempre puede redactar el suyo si lo prefiere.
-
-## Pruebas
-
-Vaya un paso más allá y escriba pruebas para su aplicación. Luego, proporcione ejemplos sobre cómo ejecutarlas aquí.
