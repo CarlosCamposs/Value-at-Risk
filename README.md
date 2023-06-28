@@ -1,2 +1,2 @@
 # Value at Risk
- Cálculo del VaR para dos activos usando cópulas
+ Cálculo del VaR y tVaR para dos activos de la Bolsa Mexicana de Valores usando cópulas
