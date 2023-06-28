@@ -19,7 +19,7 @@ library(VC2copula)
 library(scatterplot3d)
 library(cvar)
 library(knitr)
-library(DescTools) #Closest
+library(DescTools)
 
 
 
@@ -223,9 +223,9 @@ View(PL_Portafolio2)
 # -------------------------------------------------------------------------------------------
 # Simulacion de rendimientos y obtención del VaR usando copulas
   
-VaR95<-data.frame()
-tVaR95<-data.frame()  
-  
+VaRCopulas<-data.frame()
+tVaRCopulas<-data.frame()  
+Diversificado_Copulas <- data.frame()  
 
   for(i in 1:5){ # Este "for" corresponde al numero de simulaciones, tarda mucho tiempo, se puede correr una sola simulacion para ver los resultados rapidos
     
@@ -266,32 +266,57 @@ tVaR95<-data.frame()
       }
     }
     
+    #######################
+    # P&L del portafolio diversificado
+    # Construimos la P&L que consta del neteo de ambas emisoras
+    PL_DiversificadoSIM<-data.frame()
     
+    for(j in 1:nrow(PL_Portafolio)){
+      PL_DiversificadoSIM[j,1]<-rowSums(PL_EmisorasSIM)[j]
+    }
+
+            
 #####################################################################################  
-# Todo lo que esta abajo se hizo para calcular el VaR y ES de forma manual
-# Calculamos el tVaR
+  
+    #######################
+    # Calculamos el VaR tVaR para cada una de las emisoras
 
   
     for(j in 1:2){
-      VaR95[i,j]<-quantile(PL_EmisorasSIM[,j],probs=0.95)
-      tVaR95[i,j]<-ES(dist=PL_EmisorasSIM[,j],p_loss = 0.05)
+      VaRCopulas[i,j]<-quantile(PL_EmisorasSIM[,j],probs=0.95)
+      tVaRCopulas[i,j]<-ES(dist=PL_EmisorasSIM[,j],p_loss = 0.05)
     } # Estos dos dataframes que estamos llenando se crearon antes del "for" que cuenta el numero de simulaciones
     
-
+    #######################
+    # Calculamos el VaR tVaR del portafolio diversificado
         
+    Diversificado_Copulas[i,1]<-quantile(PL_DiversificadoSIM$V1,probs=0.95) # Calculamos el VaR
+    Diversificado_Copulas[i,2]<-ES(dist=PL_DiversificadoSIM$V1,p_loss = 0.05) # Calculamos el tVaR
+    
     
 }
 
-colnames(VaR95)<-c("WALMEX","FEMSA")
-colnames(tVaR95)<-c("WALMEX","FEMSA")  
+
+#####
+# VaR y tVaR de cada emisora
+  colnames(VaRCopulas)<-c("WALMEX","FEMSA")
+  colnames(tVaRCopulas)<-c("WALMEX","FEMSA")  # Cada uno de las filas de estos dataframes representan una simulacion del valor del VaR y tVaR, respectivamente
   
+  table1_Copulas<-rbind(colMeans(VaRCopulas),colMeans(tVaRCopulas))  
+  colnames(table1_Copulas)<-c("WALMEX", "FEMSA") 
+  row.names(table1_Copulas)<-c("VaRCopulas", "tVaRCopulas")
+  View(table1_Copulas)
 
-# VaR y tVaR
-
-table<-cbind(colMeans(VaR95),colMeans(tVaR95))  
-colnames(table)<-c("VaR95", "tVaR95")  
-View(table)
-
+#####
+# VaR y tVaR del portafolio diversificado
+  View(Diversificado_Copulas)  
+  
+  table2_Copulas<-cbind(colMeans(Diversificado_Copulas))
+  colnames(table2_Copulas) <-"Diversificado" 
+  row.names(table2_Copulas) <- c("VaRCopulas","tVaRCopulas")
+  View(table2_Copulas)
+  
+  
 # -------------------------------------------------------------------------------------------
 # Simulacion Historica
 
@@ -546,31 +571,40 @@ View(table2_SM)
 View(table1_Boots)
 View(table2_Boots)
 
-View(table) # VaR y tVaR no diversificado
+View(table1_Copulas) # VaR y tVaR no diversificado
+View(table2_Copulas)
 
 # table1_X[1,] Contiene los valores del VaR de cada emisora
 # table1_X[2,] Contiene los valores del tVaR de cada emisora
 
+# table2_X[1,1] Contiene los valores del VaR del portafolio diversificado
+# table1_X[2,1] Contiene los valores del tVaR del portafolio diversificado
+
+Copulas <- cbind(table1_Copulas,table2_Copulas)
+SH <- cbind(table1_SH,table2_SH)
+SM <- cbind(table1_SM,table2_SM)
+Boots <- cbind(table1_Boots,table2_Boots)
+
+
 
 #####
-# VaR 95%
+# VaR 
 
 VaR_vector<-as.data.frame(
-  rbind(table[1,],table1_SH[1,],table1_SM[1,],table1_Boots[1,]))
-rownames(VaR_vector)<-c("Copula","Simulacion Historica","Simulacion Monte-Carlo","Bootstrap")
+  rbind(Copulas[1,],SH[1,],SM[1,],Boots[1,]))
+rownames(VaR_vector)<-c("Copulas","Simulacion Historica","Simulacion Monte-Carlo","Bootstrap")
 
-kable(VaR_vector,digits = 4,caption = "VaR al 95%")
+kable(VaR_vector,digits = 4,caption = "VaR al 95%",col.names = c("WALMEX","FEMSA","Diversificado"))
 
-#kable(VaR_vector, digits = 4, col.names = c("KOFUBL","WALMEX","Portafolio") , caption = "VaR al 95%")
 
 #####
-# ES 95%
+# tVaR 
 
-ES_vector<-as.data.frame(
-  rbind(table[2,],table1_SH[2,],table1_SM[2,],table1_Boots[2,]))
-rownames(ES_vector)<-c("Copula","Simulacion Historica","Simulacion Monte-Carlo","Bootstrap")
+tVaR_vector<-as.data.frame(
+  rbind(Copulas[2,],SH[2,],SM[2,],Boots[2,]))
+rownames(tVaR_vector)<-c("Copulas","Simulacion Historica","Simulacion Monte-Carlo","Bootstrap")
 
-kable(ES_vector,digits = 4,caption = "tVaR al 95%")
+kable(tVaR_vector,digits = 4,caption = "tVaR al 95%",col.names = c("WALMEX","FEMSA","Diversificado"))
 
 
 # -------------------------------------------------------------------------------------------
