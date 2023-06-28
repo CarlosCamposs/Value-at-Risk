@@ -6,7 +6,7 @@ En este proyecto se plantea la hipótesis de que existe una dependencia entre lo
 
 Finalmente, los resultados obtenidos empleando cópulas se comparan con otros métodos matemáticos para visualizar la similitud que existe y comprobar que el uso de cópulas representa una alternativa viable.
 
-<center> <img src= "https://raw.githubusercontent.com/CarlosCamposs/Value-at-Risk/master/imagen/VaR.jpg" height="250" alt="VaR"> </center>
+<img src= "https://raw.githubusercontent.com/CarlosCamposs/Value-at-Risk/master/imagen/VaR.jpg" height="250" alt="VaR" align="center">
 
 ## Documentación
 El proyecto se desarrolla en los siguientes archivos
