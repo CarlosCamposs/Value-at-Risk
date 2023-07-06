@@ -1,8 +1,8 @@
-# Cálculo del VaR y tVaR usando cópulas
+# Cálculo del VaR y TVaR usando cópulas
 
 ## Descripción
 
-En este proyecto se plantea la hipótesis de que existe una dependencia entre los rendimientos de las acciones de FEMSA y WALMEX y se quiere cuantificar algunas medidas de riesgo a través de un modelo matemático que considere dicha dependencia. Mediante el uso de cópulas se modela la dependencia de los rendimientos de ambas acciones y se calculan medidas como el Value at Risk (VaR) y Tail Value at Risk (tVaR) para conocer el valor de pérdida máxima que se puede incurrir al ser poseedor de las acciones de ambas compañías en un horizonte de tiempo de un día. 
+En este proyecto se plantea la hipótesis de que existe una dependencia entre los rendimientos de las acciones de FEMSA y WALMEX y se quiere cuantificar algunas medidas de riesgo a través de un modelo matemático que considere dicha dependencia. Mediante el uso de cópulas se modela la dependencia de los rendimientos de ambas acciones y se calculan medidas como el Value at Risk (VaR) y Tail Value at Risk (TVaR) para conocer el valor de pérdida máxima que se puede incurrir al ser poseedor de las acciones de ambas compañías en un horizonte de tiempo de un día. 
 
 Finalmente, los resultados obtenidos empleando cópulas se comparan con otros métodos matemáticos como simulación histórica, bootstrapping y simulación de Montecarlo para visualizar la similitud que existe y comprobar que el uso de cópulas representa una alternativa viable.
 
