@@ -1,4 +1,4 @@
-# Cálculo del VaR y TVaR usando cópulas
+# Estimación del VaR y TVaR usando cópulas
 
 ## Descripción
 
