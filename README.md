@@ -16,6 +16,6 @@ El proyecto se desarrolla en los siguientes archivos
 
 - [Script de R](https://github.com/CarlosCamposs/Value-at-Risk/blob/main/(R)%20Codigo.R). Corresponde al código realizado en RStudio para la elaboración del proyecto 
 
-## Comentarios finales
+## Comentarios adicionales
 
 Se decidió realizar el análisis sobre los rendimientos de dos acciones por la facilidad que se tiene al trabajar con cópulas bivariadas, pero sin duda podría extenderse a considerar un mayor número de acciones. La programación en R para el cálculo de las medidas de riesgo no representó problema alguno, sin embargo al momento de realizar muchas simulaciones se tuvo demoras en la obtención de resultados, posiblemente se podría optimizar el código para que tarde menos al realizar un gran número de simulaciones.
